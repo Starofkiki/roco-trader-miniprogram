@@ -1,0 +1,45 @@
+name: 商品数据修正
+description: 提交有来源依据的商品名称、价格、限购或分类修正
+title: "[Catalog] "
+labels: [data]
+body:
+  - type: markdown
+    attributes:
+      value: 请提供公开可核验的来源，不要上传账号信息、聊天记录、openid 或后台截图。
+  - type: input
+    id: product
+    attributes:
+      label: 商品名称
+    validations:
+      required: true
+  - type: dropdown
+    id: field
+    attributes:
+      label: 需要修正的字段
+      options:
+        - 名称或别名
+        - 价格
+        - 限购数量
+        - 分类或状态
+        - 图片或说明
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: 当前值与建议值
+      description: 请同时写明当前内容、建议修改后的内容和适用条件。
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 公开来源
+      description: 可公开访问的网页、公告或资料链接。
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 补充说明
