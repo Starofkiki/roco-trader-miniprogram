@@ -1,0 +1,49 @@
+<view class="container about-page">
+  <view class="card about-card">
+    <text class="about-title">远行商人记录本</text>
+    <text class="about-version">当前版本：v2.0.0</text>
+  </view>
+
+  <view class="card section-card">
+    <text class="section-heading">友情链接</text>
+    <text class="paragraph source-link" bindtap="copyMagicBookLink">洛克魔法书：https://rocom.shallow.ink/</text>
+    <text class="paragraph source-link" bindtap="copyGithubLink">熵增实验室 GitHub：https://github.com/Entropy-Increase-Team</text>
+  </view>
+
+  <view class="card section-card">
+    <text class="section-heading">免责声明</text>
+    <text class="paragraph">本小程序数据由 洛克魔法书（rocom.shallow.ink）提供，仅供娱乐参考。</text>
+    <text class="paragraph">数据源于民间整理，非《洛克王国》官方数据，与官方无任何关联。游戏素材及版权归属于《洛克王国》项目组，准确信息请以官方游戏内为准。</text>
+    <text class="paragraph">因使用数据产生的任何后果与争议，由使用者自行承担，本小程序及洛克魔法书团队不承担任何责任。</text>
+  </view>
+
+  <view class="card section-card">
+    <text class="section-heading">版本记录</text>
+    <text class="line version-title">v2.0.0</text>
+    <text class="line">- 新增商品清单</text>
+    <text class="line">- 新增商品推送兜底机制</text>
+    <text class="line">- 新增商品数据统计</text>
+    <text class="line">- 优化关注提醒</text>
+    <text class="line version-title">v1.0.7</text>
+    <text class="line">- 新增商品印象记录</text>
+    <text class="line">- 新增分享和卡片分享</text>
+    <text class="line version-title">v1.0.6</text>
+    <text class="line">- 新增联系客服入口</text>
+    <text class="line">- 历史记录加载更快</text>
+    <text class="line">- 订阅提醒更省次数</text>
+    <text class="line">- 首页和图片加载更轻</text>
+    <text class="line version-title">v1.0.5</text>
+    <text class="line">- 新增公告入口</text>
+    <text class="line">- 提醒发送更稳定</text>
+    <text class="line">- 优化失败和拒收处理</text>
+    <text class="line version-title">v1.0.4</text>
+    <text class="line">- 改名为远行商人记录本</text>
+    <text class="line">- 首页商品分组展示</text>
+    <text class="line">- 历史改为日历查看</text>
+    <text class="line">- 支持稀有商品日历标记</text>
+    <text class="line version-title">v1.0.0</text>
+    <text class="line">- 支持当前商品和历史查询</text>
+    <text class="line">- 支持统计和关注提醒</text>
+    <text class="line">- 新增反馈与关于页面</text>
+  </view>
+</view>

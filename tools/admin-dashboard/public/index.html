@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ROCO 运维仪表盘</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section id="loginPanel" class="login-panel is-hidden">
+        <form id="loginForm" class="login-box">
+          <div>
+            <p class="eyebrow">LOCAL ADMIN</p>
+            <h1>ROCO 运维仪表盘</h1>
+          </div>
+          <label>
+            <span>本地后台密码</span>
+            <input id="passwordInput" type="password" autocomplete="current-password">
+          </label>
+          <button type="submit">登录</button>
+          <p id="loginMessage" class="form-message"></p>
+        </form>
+      </section>
+
+      <section id="dashboard" class="dashboard is-hidden">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">ROCO ADMIN</p>
+            <h1>提醒健康度</h1>
+          </div>
+          <div class="status-strip">
+            <span>缓存 <b id="cachedAt">未加载</b></span>
+            <span>下次云端拉取 <b id="nextRefresh">--</b></span>
+            <button id="reloadCacheBtn" type="button">读缓存</button>
+            <button id="forceRefreshBtn" type="button" class="danger">强制拉云端</button>
+            <button id="logoutBtn" type="button">退出</button>
+            <span id="topMessage" class="top-message"></span>
+          </div>
+        </header>
+
+        <section class="workspace">
+          <div class="panel rounds-panel">
+            <div class="panel-head">
+              <div>
+                <h2>最近轮次</h2>
+                <p id="roundCount">--</p>
+              </div>
+              <select id="daysSelect">
+                <option value="3">最近 3 天</option>
+                <option value="7">最近 7 天</option>
+                <option value="14">最近 14 天</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>轮次</th>
+                    <th>轮次任务</th>
+                    <th>提醒状态</th>
+                    <th>本轮商品</th>
+                    <th>队列进度</th>
+                    <th>已发</th>
+                    <th>可重试失败</th>
+                    <th>最终失败</th>
+                    <th>标记</th>
+                  </tr>
+                </thead>
+                <tbody id="roundRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="side-stack">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>错误排行</h2>
+              </div>
+              <div id="errorList" class="list"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>订阅概览</h2>
+              </div>
+              <div id="subscriptionBox" class="subscription-box"></div>
+            </section>
+
+            <section class="panel announcement-panel">
+              <div class="panel-head">
+                <div>
+                  <h2>首页公告</h2>
+                  <p id="announcementUpdatedAt">未读取</p>
+                </div>
+                <button id="loadAnnouncementBtn" type="button">读取</button>
+              </div>
+              <form id="announcementForm" class="announcement-form">
+                <label>
+                  <span>标题</span>
+                  <input id="announcementTitle" type="text" maxlength="20" autocomplete="off" placeholder="公告">
+                </label>
+                <label>
+                  <span>内容</span>
+                  <textarea id="announcementContent" rows="5" maxlength="500" placeholder="填写后保存，首页公告按钮会展示这里的内容"></textarea>
+                </label>
+                <label class="check-line">
+                  <input id="announcementEnabled" type="checkbox">
+                  <span>启用公告</span>
+                </label>
+                <button type="submit">保存公告</button>
+                <p id="announcementMessage" class="form-message"></p>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>最近反馈</h2>
+              </div>
+              <div id="feedbackBox" class="feedback-box"></div>
+            </section>
+
+            <section class="panel user-trace-panel">
+              <div class="panel-head">
+                <h2>用户诊断</h2>
+              </div>
+              <form id="userTraceForm" class="trace-form">
+                <label>
+                  <span>openid</span>
+                  <input id="traceOpenid" type="text" autocomplete="off" placeholder="粘贴用户 openid">
+                </label>
+                <label>
+                  <span>roundKey</span>
+                  <input id="traceRoundKey" type="text" autocomplete="off" placeholder="默认最近一轮">
+                </label>
+                <button type="submit">查询原因</button>
+              </form>
+              <div id="userTraceResult" class="trace-result muted">输入 openid 后查询本轮推送链路。</div>
+            </section>
+
+            <section class="panel operations">
+              <details>
+                <summary>运维操作</summary>
+                <p id="selectedRoundText" class="selected-round-text">当前轮次：未选择，请先点击左侧轮次行</p>
+                <div class="operation-grid">
+                  <button data-operation="forceSyncCurrent" data-notify="false" type="button">强制同步</button>
+                  <button data-operation="forceSyncCurrent" data-notify="true" type="button">同步并推送</button>
+                  <button data-operation="notifyCurrent" type="button">补发当前轮</button>
+                  <button data-operation="notifyRoundPending" data-round="selected" type="button">补发本轮待处理</button>
+                  <button data-operation="backfillWechatRejectedQuotas" data-round="selected" type="button">回填选中轮次拒收</button>
+                  <button data-operation="backfillWechatRejectedQuotas" data-scope="all" type="button" class="danger">回填全部历史拒收</button>
+                  <button data-operation="repairQuotaConsumePending" data-round="selected" type="button">补记扣次</button>
+                  <button data-operation="repairQuotaRefundPending" data-round="selected" type="button">补退次数</button>
+                  <button data-operation="clearLegacyNotificationCollections" type="button" class="danger">清理旧通知表</button>
+                </div>
+                <label>
+                  <span>测试 openid，逗号分隔</span>
+                  <textarea id="resetOpenids" rows="3"></textarea>
+                </label>
+                <button id="resetTesterBtn" type="button" class="danger">重置测试数据</button>
+                <p id="operationMessage" class="form-message"></p>
+              </details>
+            </section>
+          </aside>
+        </section>
+      </section>
+    </main>
+
+    <aside id="detailDrawer" class="drawer">
+      <div class="drawer-head">
+        <div>
+          <p class="eyebrow">ROUND DETAIL</p>
+          <h2 id="detailTitle">轮次详情</h2>
+        </div>
+        <button id="closeDrawerBtn" type="button">关闭</button>
+      </div>
+      <div class="drawer-actions">
+        <button id="loadDetailCacheBtn" type="button">读详情缓存</button>
+        <button id="loadDetailCloudBtn" type="button" class="danger">拉取详情云端</button>
+      </div>
+      <div id="detailBody" class="detail-body"></div>
+    </aside>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-08-10T07:59:24.953Z",
+  "version": "ecf4193abffcacb8",
+  "source_product_count": 67,
+  "catalog_product_count": 69,
+  "source_offer_count": 53,
+  "catalog_offer_count": 68,
+  "duplicate_source_offer_names": [
+    {
+      "name": "国王球",
+      "count": 2
+    },
+    {
+      "name": "棱镜球",
+      "count": 2
+    },
+    {
+      "name": "神奇的蛋",
+      "count": 2
+    }
+  ],
+  "ambiguous_aliases": [],
+  "unmatched_offers": [],
+  "missing_images": [],
+  "missing_cloud_images": [],
+  "cloud_json": "",
+  "cloud_additions": [],
+  "cloud_conflicts": []
+}

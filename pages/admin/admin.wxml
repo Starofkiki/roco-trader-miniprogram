@@ -1,0 +1,262 @@
+<view class="admin-page">
+  <view class="admin-hero">
+    <text class="hero-title">管理员工作台</text>
+    <text class="hero-copy">人工兜底与运营管理</text>
+    <view class="hero-status">
+      <text class="status-light {{current.manualOverride ? 'locked' : ''}}"></text>
+      <text>{{current.roundKey || '非开放时段'}} · {{current.sourceText}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{authChecking}}" class="state-card">正在核验管理员身份…</view>
+
+  <block wx:elif="{{isAdmin}}">
+    <view class="tab-list">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="tab-item {{activeTab === item.key ? 'active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="switchTab"
+      >
+        <text>{{item.short}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{pageLoading}}" class="state-card">正在同步管理数据…</view>
+
+    <view wx:if="{{activeTab === 'manual'}}" class="panel-stack">
+      <view class="section-intro">
+        <view>
+          <text class="section-title">人工填写当前轮</text>
+          <text class="section-copy">保存后，本轮远程同步不再覆盖这份记录。</text>
+        </view>
+      </view>
+
+      <view class="record-card {{current.manualOverride ? 'manual' : ''}}">
+        <view class="record-head">
+          <text class="record-label">当前轮次</text>
+          <text class="record-source">{{current.sourceText}}</text>
+        </view>
+        <text class="record-key">{{current.roundKey || '当前未开放'}}</text>
+        <text class="record-time">{{current.timeMetaText}}</text>
+        <view wx:if="{{current.items.length}}" class="chip-row">
+          <text wx:for="{{current.items}}" wx:key="id" class="item-chip">{{item.name}}</text>
+        </view>
+        <text wx:else class="empty-copy">当前轮尚无已写入商品</text>
+      </view>
+
+      <view class="form-card">
+        <view class="field-label-row">
+          <text class="field-label">选择商品</text>
+          <text class="selection-count">已选 {{selectedProductIds.length}}</text>
+        </view>
+        <view class="search-box">
+          <text class="search-mark">⌕</text>
+          <input value="{{productQuery}}" placeholder="搜索商品名称或别名" bindinput="onProductSearch" />
+        </view>
+        <scroll-view class="product-picker" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+          <view
+            wx:for="{{filteredProducts}}"
+            wx:key="product_id"
+            class="product-option {{item.selected ? 'selected' : ''}}"
+            data-id="{{item.productId}}"
+            bindtap="toggleProduct"
+          >
+            <view class="product-image-wrap">
+              <image wx:if="{{item.image}}" class="product-image" src="{{item.image}}" mode="aspectFit" />
+              <text wx:else>{{item.icon}}</text>
+            </view>
+            <view class="product-copy">
+              <text class="product-title">{{item.title}}</text>
+              <text class="product-category">{{item.category || '商品目录'}}</text>
+            </view>
+            <text class="check-mark">{{item.selected ? '✓' : '+'}}</text>
+          </view>
+        </scroll-view>
+        <view class="switch-row">
+          <view>
+            <text class="switch-title">覆盖当前轮数据</text>
+            <text class="switch-copy">已有远程或人工记录时必须开启</text>
+          </view>
+          <switch checked="{{overwriteCurrent}}" color="#d59a2c" bindchange="onOverwriteChange" />
+        </view>
+        <button class="primary-action" loading="{{actionLoading}}" bindtap="saveManualCurrent">保存并锁定本轮</button>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'notify'}}" class="panel-stack">
+      <view class="section-intro">
+        <view>
+          <text class="section-title">重点商品推送</text>
+          <text class="section-copy">只触达关注该商品、有次数且未拒收的用户。</text>
+        </view>
+      </view>
+
+      <view class="form-card">
+        <text class="field-label">选择当前轮商品</text>
+        <view wx:if="{{current.items.length}}" class="notify-options">
+          <view
+            wx:for="{{current.items}}"
+            wx:key="id"
+            class="notify-option {{notifyProductId === item.productId ? 'selected' : ''}}"
+            data-id="{{item.productId}}"
+            bindtap="selectNotifyProduct"
+          >
+            <text>{{item.name}}</text>
+          </view>
+        </view>
+        <view wx:else class="empty-box">当前轮没有可推送商品，请先完成数据写入。</view>
+        <button class="secondary-action" disabled="{{!notifyProductId}}" loading="{{actionLoading}}" bindtap="previewNotification">计算可发送人数</button>
+      </view>
+
+      <view wx:if="{{notifyPreview}}" class="dispatch-card">
+        <text class="dispatch-kicker">推送预览</text>
+        <text class="dispatch-title">{{notifyPreview.itemName}}</text>
+        <view class="dispatch-metrics">
+          <view>
+            <text class="metric-number">{{notifyPreview.followerCount}}</text>
+            <text class="metric-label">关注人数</text>
+          </view>
+          <view>
+            <text class="metric-number accent">{{notifyPreview.eligibleCount}}</text>
+            <text class="metric-label">实际可发</text>
+          </view>
+        </view>
+        <text class="dispatch-note">同一用户本轮已成功提醒时会自动跳过，不重复扣次。</text>
+        <button class="danger-action" loading="{{actionLoading}}" bindtap="sendNotification">二次确认并发送</button>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'notice'}}" class="panel-stack">
+      <view class="section-intro">
+        <view>
+          <text class="section-title">公告管理</text>
+          <text class="section-copy">新公告会成为首页当前公告，并保留在历史公告页。</text>
+        </view>
+      </view>
+
+      <view class="form-card">
+        <view class="field-label-row">
+          <text class="field-label">{{editingNoticeId ? '编辑公告' : '发布新公告'}}</text>
+          <text wx:if="{{editingNoticeId}}" class="text-action" bindtap="cancelNoticeEdit">取消编辑</text>
+        </view>
+        <input class="text-input" maxlength="20" value="{{noticeTitle}}" placeholder="公告标题（20 字以内）" bindinput="onNoticeTitle" />
+        <textarea class="text-area" maxlength="500" value="{{noticeContent}}" placeholder="公告正文（500 字以内）" bindinput="onNoticeContent"></textarea>
+        <view class="switch-row notice-pin-row">
+          <view>
+            <text class="switch-title">置顶此公告</text>
+            <text class="switch-copy">置顶后优先显示在历史列表和首页公告条</text>
+          </view>
+          <switch checked="{{noticePinned}}" color="#d59a2c" bindchange="onNoticePinned" />
+        </view>
+        <button class="primary-action" loading="{{actionLoading}}" bindtap="saveNotice">{{editingNoticeId ? '保存修改' : '发布公告'}}</button>
+      </view>
+
+      <view class="notice-admin-list">
+        <view wx:for="{{announcements}}" wx:key="id" class="notice-admin-item {{item.deleted ? 'deleted' : ''}}">
+          <view class="notice-admin-meta">
+            <text>{{item.timeText}}</text>
+            <view class="notice-state-group">
+              <text wx:if="{{item.pinned}}" class="pin-pill">置顶</text>
+              <text class="state-pill">{{item.deleted ? '已删除' : '展示中'}}</text>
+            </view>
+          </view>
+          <text class="notice-admin-title">{{item.title}}</text>
+          <text class="notice-admin-content">{{item.content}}</text>
+          <view class="inline-actions">
+            <button wx:if="{{!item.deleted}}" size="mini" data-id="{{item.id}}" bindtap="editNotice">编辑</button>
+            <button size="mini" class="quiet-danger" data-id="{{item.id}}" data-deleted="{{item.deleted}}" bindtap="toggleNoticeDeleted">{{item.deleted ? '恢复' : '删除'}}</button>
+          </view>
+        </view>
+        <view wx:if="{{!announcements.length}}" class="empty-box">还没有历史公告</view>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'feedback'}}" class="panel-stack">
+      <view class="section-intro">
+        <view>
+          <text class="section-title">用户反馈</text>
+          <text class="section-copy">公开回复会显示给用户，内部备注只供管理员查看。</text>
+        </view>
+      </view>
+
+      <view class="filter-row">
+        <text class="filter-pill {{feedbackStatus === 'all' ? 'active' : ''}}" data-status="all" bindtap="setFeedbackStatus">全部</text>
+        <text class="filter-pill {{feedbackStatus === 'new' ? 'active' : ''}}" data-status="new" bindtap="setFeedbackStatus">未处理</text>
+        <text class="filter-pill {{feedbackStatus === 'handled' ? 'active' : ''}}" data-status="handled" bindtap="setFeedbackStatus">已处理</text>
+      </view>
+
+      <view class="feedback-list">
+        <view wx:for="{{feedbackItems}}" wx:key="id" class="feedback-card">
+          <view class="feedback-meta">
+            <text class="feedback-type">{{item.type || '反馈'}}</text>
+            <text>{{item.timeText}}</text>
+          </view>
+          <text class="feedback-content">{{item.content}}</text>
+          <text class="masked-id">{{item.maskedOpenid}}</text>
+          <view class="feedback-field">
+            <text class="feedback-field-label public">回复用户（用户可见）</text>
+            <textarea class="note-area reply-area" maxlength="500" value="{{item.publicReply}}" placeholder="填写后会显示在用户的“我的反馈”中" data-index="{{index}}" bindinput="onFeedbackReply"></textarea>
+          </view>
+          <view class="feedback-field">
+            <text class="feedback-field-label">内部备注（用户不可见）</text>
+            <textarea class="note-area" maxlength="500" value="{{item.adminNote}}" placeholder="仅管理员可见" data-index="{{index}}" bindinput="onFeedbackNote"></textarea>
+          </view>
+          <view class="feedback-actions">
+            <view class="handled-switch">
+              <text>已处理</text>
+              <switch checked="{{item.handled}}" color="#d59a2c" data-index="{{index}}" bindchange="onFeedbackHandled" />
+            </view>
+            <button size="mini" class="save-note" data-index="{{index}}" loading="{{actionLoading}}" bindtap="saveFeedback">保存</button>
+          </view>
+        </view>
+        <view wx:if="{{!feedbackItems.length}}" class="empty-box">当前筛选下暂无反馈</view>
+        <view wx:if="{{feedbackHasMore}}" class="load-more" bindtap="loadMoreFeedback">加载更多</view>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 'overview'}}" class="panel-stack">
+      <view class="section-intro">
+        <view>
+          <text class="section-title">订阅概览</text>
+          <text class="section-copy">所有人数按用户去重，数据来自当前启用关注。</text>
+        </view>
+      </view>
+
+      <view class="overview-grid">
+        <view class="overview-card featured">
+          <text class="overview-label">总关注用户</text>
+          <text class="overview-value">{{overview.totalFollowUsers}}</text>
+        </view>
+        <view class="overview-card">
+          <text class="overview-label">有剩余次数</text>
+          <text class="overview-value">{{overview.usersWithRemaining}}</text>
+        </view>
+        <view class="overview-card">
+          <text class="overview-label">炫彩蛋</text>
+          <text class="overview-value">{{overview.colorfulEggFollowers}}</text>
+        </view>
+        <view class="overview-card">
+          <text class="overview-label">国王球</text>
+          <text class="overview-value">{{overview.kingBallFollowers}}</text>
+        </view>
+        <view class="overview-card">
+          <text class="overview-label">棱镜球</text>
+          <text class="overview-value">{{overview.prismBallFollowers}}</text>
+        </view>
+        <view class="overview-card">
+          <text class="overview-label">剩余次数总量</text>
+          <text class="overview-value">{{overview.totalRemainingQuota}}</text>
+        </view>
+        <view class="overview-card alert-card">
+          <text class="overview-label">拒收或无次数</text>
+          <text class="overview-value">{{overview.unavailableUsers}}</text>
+        </view>
+      </view>
+      <button class="secondary-action" bindtap="loadOverview">刷新概览</button>
+    </view>
+  </block>
+
+  <view class="safe-bottom"></view>
+</view>

@@ -1,0 +1,47 @@
+<view class="container products-page">
+  <view
+    class="product-section {{group.isFocus ? 'focus-section' : ''}} {{!group.isFocus && expandedProductGroup === group.name ? 'is-expanded' : ''}}"
+    wx:for="{{groups}}"
+    wx:for-item="group"
+    wx:key="name"
+  >
+    <view
+      class="group-head {{group.isFocus ? '' : 'collapsible'}}"
+      data-group-name="{{group.name}}"
+      bindtap="toggleProductGroup"
+    >
+      <view class="group-mark"></view>
+      <text class="group-title">{{group.name}}</text>
+      <view wx:if="{{!group.isFocus}}" class="group-toggle {{expandedProductGroup === group.name ? 'expanded' : ''}}">
+        <view class="group-chevron"></view>
+      </view>
+    </view>
+
+    <view wx:if="{{group.isFocus || expandedProductGroup === group.name}}" class="product-grid">
+      <view
+        class="product-card {{group.isFocus ? 'focus-product' : ''}}"
+        wx:for="{{group.items}}"
+        wx:for-item="item"
+        wx:key="product_id"
+        data-product-id="{{item.product_id}}"
+        data-title="{{item.title}}"
+        bindtap="openProduct"
+      >
+        <view class="product-image-wrap">
+          <text class="product-fallback">{{item.fallbackIcon}}</text>
+          <image
+            wx:if="{{item.hasImage}}"
+            class="product-image"
+            src="{{item.image}}"
+            mode="aspectFit"
+            lazy-load
+            data-product-id="{{item.product_id}}"
+            data-title="{{item.title}}"
+            binderror="handleProductImageError"
+          ></image>
+        </view>
+        <text class="product-name">{{item.title}}</text>
+      </view>
+    </view>
+  </view>
+</view>

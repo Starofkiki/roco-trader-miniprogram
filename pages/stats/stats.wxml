@@ -1,0 +1,275 @@
+<view class="stats-page">
+  <view class="stats-switch">
+    <view class="switch-btn {{activeTab === 'history' ? 'active' : ''}}" data-tab="history" bindtap="switchTab">历史</view>
+    <view class="switch-btn {{activeTab === 'stats' ? 'active' : ''}}" data-tab="stats" bindtap="switchTab">商品清单</view>
+  </view>
+
+  <view class="container stats-body">
+    <view hidden="{{activeTab !== 'history'}}">
+      <view class="empty-card card" wx:if="{{!historyLoading && !hasHistoryData}}">
+        <view class="empty-title">暂无历史记录</view>
+        <view class="empty-desc">请等待后端采集当前轮次数据。</view>
+      </view>
+
+      <view class="history-list" wx:if="{{hasHistoryData}}">
+        <view class="calendar-card card">
+          <view class="calendar-top">
+            <view class="month-btn {{canPrevCalendarMonth ? '' : 'disabled'}}" data-direction="-1" bindtap="changeCalendarMonth">‹</view>
+            <text class="calendar-title">{{calendarMonthText}}</text>
+            <view class="month-btn {{canNextCalendarMonth ? '' : 'disabled'}}" data-direction="1" bindtap="changeCalendarMonth">›</view>
+          </view>
+
+          <view class="calendar-weekdays">
+            <text class="weekday" wx:for="{{calendarWeekdays}}" wx:key="*this">{{item}}</text>
+          </view>
+
+          <view class="calendar-grid">
+            <view class="calendar-week" wx:for="{{calendarWeeks}}" wx:for-item="week" wx:key="weekKey">
+              <view
+                class="calendar-day {{day.isCurrentMonth ? '' : 'outside'}} {{day.hasData ? 'has-data' : ''}} {{day.isSelected ? 'selected' : ''}}"
+                wx:for="{{week}}"
+                wx:for-item="day"
+                wx:key="date"
+                data-date="{{day.date}}"
+                bindtap="selectCalendarDate"
+              >
+                <text class="calendar-number">{{day.day}}</text>
+                <view class="calendar-icons" wx:if="{{day.rareIcons.length > 0}}">
+                  <image class="calendar-icon" wx:for="{{day.rareIcons}}" wx:for-item="icon" wx:key="key" src="{{icon.image}}" mode="aspectFit"></image>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="day-summary card" wx:if="{{selectedDay}}">
+          <view>
+            <text class="history-date">{{selectedDay.dateText}}</text>
+            <text class="history-time">{{selectedDay.weekdayText}}</text>
+          </view>
+          <view class="summary-counts">
+            <text class="summary-pill rare">稀有 {{selectedDay.rareItems.length}}</text>
+            <text class="summary-pill">热销 {{selectedDay.hotItems.length}}</text>
+          </view>
+        </view>
+
+        <view class="history-section rare-section" wx:if="{{selectedDay && selectedDay.rareItems.length > 0}}">
+          <view class="section-subhead">
+            <text class="section-subtitle">稀有商品</text>
+          </view>
+          <view class="history-items highlight-items">
+            <view class="history-item rare-item" wx:for="{{selectedDay.rareItems}}" wx:for-item="product" wx:key="id">
+              <image wx:if="{{product.image}}" class="item-thumb" src="{{product.image}}" mode="aspectFit" lazy-load></image>
+              <view wx:else class="item-dot">{{product.icon || product.name.slice(0, 1)}}</view>
+              <view class="item-main">
+                <view class="item-name-row">
+                  <text class="item-name">{{product.name}}</text>
+                  <text class="all-day-tag" wx:if="{{product.allDayLabel}}">{{product.allDayLabel}}</text>
+                </view>
+              </view>
+              <view
+                wx:if="{{product.canPrismShare}}"
+                class="rare-share-btn {{voteShareGenerating ? 'loading' : ''}}"
+                data-name="{{product.name}}"
+                data-image="{{product.image}}"
+                data-date-text="{{product.historyDateText}}"
+                data-round-text="{{product.historyRoundText}}"
+                catchtap="sharePrismPoster"
+              >分享</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="history-section" wx:if="{{selectedDay && selectedDay.hotItems.length > 0}}">
+          <view class="section-subhead">
+            <text class="section-subtitle">热销商品</text>
+          </view>
+          <view class="history-items hot-panel card">
+            <view class="history-item hot-item" wx:for="{{selectedDay.hotItems}}" wx:for-item="product" wx:key="id">
+              <image wx:if="{{product.image}}" class="item-thumb" src="{{product.image}}" mode="aspectFit" lazy-load></image>
+              <view wx:else class="item-dot">{{product.icon || product.name.slice(0, 1)}}</view>
+              <view class="item-main">
+                <text class="item-name">{{product.name}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="history-section" wx:if="{{selectedDay && selectedDay.rounds.length > 0}}">
+          <view class="section-subhead">
+            <text class="section-subtitle">常规商品</text>
+            <view
+              class="history-refresh-btn {{historyRefreshing ? 'refreshing' : ''}}"
+              catchtap="refreshHistoryFromButton"
+              hover-class="history-refresh-btn-active"
+              aria-label="刷新历史记录"
+            >
+              <view class="history-refresh-icon"></view>
+            </view>
+          </view>
+          <view class="rounds-panel card">
+            <view
+              class="round-block"
+              wx:for="{{selectedDay.rounds}}"
+              wx:key="round"
+              data-round="{{item.round}}"
+              bindtap="showRoundVoteDetail"
+            >
+              <view class="round-content">
+                <view class="round-row-head">
+                  <text class="round-badge">{{item.roundText}}</text>
+                </view>
+
+                <view class="history-items compact-items">
+                  <view class="history-item compact-item" wx:for="{{item.normalItems}}" wx:for-item="product" wx:key="id">
+                    <image wx:if="{{product.image}}" class="item-thumb" src="{{product.image}}" mode="aspectFit" lazy-load></image>
+                    <view wx:else class="item-dot">{{product.icon || product.name.slice(0, 1)}}</view>
+                    <view class="item-main">
+                      <text class="item-name">{{product.name}}</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+
+              <view
+                wx:if="{{item.voteSummary}}"
+                class="round-vote-emotion"
+                data-round="{{item.round}}"
+                catchtap="showRoundVoteDetail"
+              >
+                <image
+                  wx:if="{{item.voteSummary.topImage}}"
+                  class="round-vote-image-large"
+                  src="{{item.voteSummary.topImage}}"
+                  mode="aspectFit"
+                  lazy-load
+                ></image>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="empty-card card" wx:if="{{selectedDay && selectedDay.totalItemCount === 0}}">
+          <view class="empty-title">当天暂无商品</view>
+          <view class="empty-desc">这一天还没有可展示的历史商品。</view>
+        </view>
+      </view>
+    </view>
+
+    <view hidden="{{activeTab !== 'stats'}}">
+      <view
+        class="catalog-section {{group.isFocus ? 'focus-section' : ''}} {{!group.isFocus && group.isExpanded ? 'is-expanded' : ''}}"
+        wx:for="{{productGroups}}"
+        wx:for-item="group"
+        wx:key="name"
+      >
+        <view
+          class="catalog-group-head {{group.isFocus ? '' : 'collapsible'}}"
+          data-group-name="{{group.name}}"
+          bindtap="toggleProductGroup"
+        >
+          <view class="catalog-group-mark"></view>
+          <text class="catalog-group-title">{{group.name}}</text>
+          <view wx:if="{{!group.isFocus}}" class="catalog-group-toggle {{group.isExpanded ? 'expanded' : ''}}">
+            <view class="catalog-group-chevron"></view>
+          </view>
+        </view>
+
+        <view
+          wx:if="{{group.isFocus || group.isLoaded}}"
+          hidden="{{!group.isFocus && !group.isExpanded}}"
+          class="catalog-grid"
+        >
+          <view
+            class="catalog-card {{group.isFocus ? 'focus-product' : ''}}"
+            wx:for="{{group.items}}"
+            wx:for-item="item"
+            wx:key="product_id"
+            data-product-id="{{item.product_id}}"
+            data-title="{{item.title}}"
+            bindtap="openProduct"
+          >
+            <view class="catalog-thumb">
+              <image
+                wx:if="{{item.hasImage}}"
+                class="catalog-image"
+                src="{{item.image}}"
+                mode="aspectFit"
+                lazy-load
+                data-product-id="{{item.product_id}}"
+                data-title="{{item.title}}"
+                binderror="handleCatalogImageError"
+              ></image>
+            </view>
+            <text class="catalog-name">{{item.title}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{voteDetailVisible}}" class="vote-detail-mask" bindtap="closeRoundVoteDetail"></view>
+  <view wx:if="{{voteDetailVisible}}" class="vote-detail-sheet" catchtap="stopTap">
+    <view class="vote-detail-head">
+      <view class="vote-detail-title-wrap">
+        <text class="vote-detail-kicker">{{selectedRoundVoteDetail.dateText}} {{selectedRoundVoteDetail.roundText}}</text>
+      </view>
+      <view class="vote-detail-actions">
+        <view class="vote-detail-share {{voteShareGenerating ? 'loading' : ''}}" catchtap="shareRoundVotePoster">{{voteShareGenerating ? '...' : '↗'}}</view>
+        <view class="vote-detail-close" catchtap="closeRoundVoteDetail">×</view>
+      </view>
+    </view>
+
+    <block wx:if="{{selectedRoundVoteDetail.hasVotes}}">
+      <view class="vote-detail-overview">
+        <view class="vote-detail-products" wx:if="{{selectedRoundVoteDetail.products.length > 0}}">
+          <view
+            class="vote-detail-product"
+            wx:for="{{selectedRoundVoteDetail.products}}"
+            wx:for-item="product"
+            wx:key="id"
+          >
+            <image wx:if="{{product.image}}" class="vote-detail-product-image" src="{{product.image}}" mode="aspectFit"></image>
+            <text wx:else class="vote-detail-product-fallback">{{product.icon || product.name.slice(0, 1)}}</text>
+          </view>
+        </view>
+        <view class="vote-detail-hero">
+          <view class="vote-detail-hero-text">
+            <text class="vote-detail-eyebrow">当前综合印象</text>
+            <text class="vote-detail-result">{{selectedRoundVoteDetail.voteSummary.topLabel}}</text>
+          </view>
+          <image
+            wx:if="{{selectedRoundVoteDetail.voteSummary.topImage}}"
+            class="vote-detail-face"
+            src="{{selectedRoundVoteDetail.voteSummary.topImage}}"
+            mode="aspectFit"
+          ></image>
+        </view>
+      </view>
+
+      <view class="vote-detail-distribution">
+        <view
+          class="vote-detail-row {{option.isTop ? 'top' : ''}}"
+          wx:for="{{selectedRoundVoteDetail.voteSummary.options}}"
+          wx:for-item="option"
+          wx:key="key"
+        >
+          <image class="vote-detail-option-face" src="{{option.image}}" mode="aspectFit"></image>
+          <text class="vote-detail-option-label">{{option.label}}</text>
+          <view class="vote-detail-track">
+            <view class="vote-detail-fill" style="width: {{option.percent}}%;"></view>
+          </view>
+          <text class="vote-detail-percent">{{option.percent}}%</text>
+          <text class="vote-detail-count">{{option.count}}人</text>
+        </view>
+      </view>
+    </block>
+
+    <view wx:else class="vote-detail-empty">
+      <text class="vote-detail-empty-title">暂无印象</text>
+      <text class="vote-detail-empty-desc">这一轮还没有收到印象数据。</text>
+    </view>
+  </view>
+
+  <canvas canvas-id="voteShareCanvas" class="vote-share-canvas" style="position: fixed; left: -9999px; top: -9999px; width: 750px; height: 1000px;"></canvas>
+</view>

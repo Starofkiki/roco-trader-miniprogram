@@ -1,0 +1,129 @@
+<view class="container home-page">
+  <view class="round-card card {{roundInfo.isOpen ? '' : 'closed'}}">
+    <view class="round-top">
+      <view class="round-copy">
+        <view class="round-context">
+          <text class="round-label">{{roundInfo.roundLabel}}</text>
+          <text class="round-number">{{roundInfo.roundDisplay}}</text>
+        </view>
+        <view class="round-row">
+          <text class="round-countdown-label">{{roundInfo.isOpen ? '距本轮结束' : roundInfo.countdownLabel}}</text>
+          <text class="countdown">{{roundInfo.countdown}}</text>
+        </view>
+      </view>
+      <view class="round-time">{{roundInfo.rangeText}}</view>
+    </view>
+  </view>
+
+  <view
+    wx:if="{{homeReminderVisible}}"
+    class="home-reminder-bar {{homeReminderType}}"
+    bindtap="openFollowPageFromReminder"
+  >
+    <view class="home-reminder-dot"></view>
+    <text class="home-reminder-title">{{homeReminderTitle}}</text>
+    <text class="home-reminder-text">{{homeReminderText}}</text>
+    <text class="home-reminder-arrow">›</text>
+  </view>
+
+  <view wx:if="{{announcementBarVisible}}" class="home-announcement-bar" bindtap="openHomeAnnouncement">
+    <text class="home-announcement-badge">{{announcementPinned ? '置顶公告' : '公告'}}</text>
+    <view class="home-announcement-copy">
+      <text class="home-announcement-title">{{announcementTitle}}</text>
+    </view>
+    <text class="home-announcement-arrow">›</text>
+    <view class="home-announcement-close" catchtap="dismissHomeAnnouncement">×</view>
+  </view>
+
+  <view class="vote-card card" wx:if="{{voteVisible}}">
+    <view class="vote-head">
+      <view>
+        <text class="vote-title">本轮印象</text>
+        <text wx:if="{{!voteSummary.myChoice}}" class="vote-subtitle">你觉得这轮货怎么样？</text>
+      </view>
+    </view>
+
+    <view class="vote-result" wx:if="{{voteSummary.myChoice}}">
+      <view class="vote-feedback">
+        <image
+          class="vote-merchant-image"
+          src="{{voteSummary.selectedImage}}"
+          mode="aspectFit"
+          lazy-load
+        ></image>
+        <view class="vote-reply-content">
+          <text class="vote-reply-text">{{voteSummary.selectedReply}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="vote-options" wx:if="{{!voteSummary.myChoice}}">
+      <view
+        class="vote-option {{votePendingChoice === item.key ? 'selected' : ''}} {{voteSubmitting ? 'locked' : ''}}"
+        wx:for="{{voteSummary.options}}"
+        wx:key="key"
+        data-choice="{{item.key}}"
+        bindtap="submitVote"
+      >
+        <text class="vote-label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-head">
+    <text class="section-title">当前商品</text>
+    <view wx:if="{{products.length > 0}}" class="share-round-shell">
+      <text class="share-round-icon">↗</text>
+      <text>分享本轮</text>
+      <button
+        class="share-round-hit"
+        open-type="share"
+        plain="true"
+        hover-class="none"
+        data-share-type="round"
+      ></button>
+    </view>
+  </view>
+
+  <view class="current-products-panel" wx:if="{{products.length > 0}}">
+    <view class="current-product-grid">
+      <view
+        class="current-product {{product.saleGroup}} {{product.type}} {{product.isUnknown ? 'unknown' : ''}}"
+        wx:for="{{products}}"
+        wx:for-item="product"
+        wx:key="id"
+        data-product-id="{{product.product_id}}"
+        data-title="{{product.detailTitle}}"
+        data-sale-group="{{product.saleGroup}}"
+        data-buy-limit="{{product.buyLimit}}"
+        bindtap="openProductDetail"
+      >
+        <view class="product-corner"></view>
+        <view class="current-product-art">
+          <image
+            wx:if="{{product.hasImage}}"
+            class="current-product-image"
+            src="{{product.image}}"
+            mode="aspectFit"
+            lazy-load
+            data-index="{{index}}"
+            binderror="handleProductImageError"
+          ></image>
+          <view wx:else class="current-product-fallback">
+            <text class="fallback-glyph">{{product.icon}}</text>
+          </view>
+        </view>
+        <text class="current-product-name">{{product.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-card card" wx:else>
+    <view class="empty-icon">物</view>
+    <view>
+      <view class="empty-title">{{merchantPending ? '本轮商品同步中' : '当前商品暂未获取到'}}</view>
+      <view class="empty-desc">{{merchantPending ? '通常会在开场后 3 分钟内完成，请稍后再来看看' : (roundInfo.isOpen ? '可以下拉刷新，稍后再来看看' : '商人营业后，这里会展示本轮商品')}}</view>
+    </view>
+  </view>
+
+</view>
