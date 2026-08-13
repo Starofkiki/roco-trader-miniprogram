@@ -1,0 +1,6 @@
+{
+  "rules": [
+    { "action": "disallow", "page": "pages/admin/admin" },
+    { "action": "allow", "page": "*" }
+  ]
+}

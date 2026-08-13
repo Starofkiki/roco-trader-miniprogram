@@ -1,0 +1,16 @@
+{
+  "timeout": 60,
+  "permissions": {
+    "openapi": [
+      "subscribeMessage.send",
+      "wxacode.getUnlimited"
+    ]
+  },
+  "triggers": [
+    {
+      "name": "merchant_round_retry",
+      "type": "timer",
+      "config": "0 3,5,10 8,12,16,20 * * * *"
+    }
+  ]
+}

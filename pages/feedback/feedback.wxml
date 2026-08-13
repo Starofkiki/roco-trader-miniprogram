@@ -1,0 +1,80 @@
+<view class="container feedback-page">
+  <view class="form-card card">
+    <view class="form-row">
+      <text class="label">反馈类型</text>
+      <picker mode="selector" range="{{typeOptions}}" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="picker-value">{{typeOptions[typeIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="form-row vertical">
+      <text class="label">反馈内容</text>
+      <textarea
+        class="textarea"
+        value="{{content}}"
+        maxlength="500"
+        placeholder="请描述你遇到的问题或建议"
+        bindinput="onContentInput"
+      ></textarea>
+    </view>
+  </view>
+
+  <button class="primary-btn submit-btn" loading="{{submitting}}" bindtap="submitFeedback">提交反馈</button>
+
+  <view class="my-feedback-section">
+    <view class="my-feedback-heading">
+      <view>
+        <text class="my-feedback-title">我的反馈</text>
+        <text class="my-feedback-subtitle">处理进度和管理员回复都会保留在这里</text>
+      </view>
+      <text wx:if="{{feedbackUnreadCount > 0}}" class="unread-count">{{feedbackUnreadCount}} 条新回复</text>
+    </view>
+
+    <view wx:if="{{feedbackLoading && !feedbackLoaded}}" class="feedback-state card">正在加载反馈记录…</view>
+    <view wx:elif="{{feedbackError && !myFeedbackItems.length}}" class="feedback-state card">
+      <text>反馈记录加载失败</text>
+      <text class="retry-link" bindtap="retryMyFeedback">重新加载</text>
+    </view>
+    <view wx:elif="{{feedbackLoaded && !myFeedbackItems.length}}" class="feedback-empty card">
+      <text class="feedback-empty-title">还没有提交过反馈</text>
+      <text class="feedback-empty-text">提交后可以在这里查看处理状态。</text>
+    </view>
+
+    <view class="my-feedback-list" wx:if="{{myFeedbackItems.length}}">
+      <view
+        class="my-feedback-card card {{item.expanded ? 'expanded' : ''}}"
+        wx:for="{{myFeedbackItems}}"
+        wx:key="id"
+        data-index="{{index}}"
+        bindtap="toggleFeedback"
+      >
+        <view class="my-feedback-meta">
+          <text class="my-feedback-type">{{item.type || '反馈'}}</text>
+          <view class="my-feedback-badges">
+            <text wx:if="{{item.unread}}" class="new-reply-badge">新回复</text>
+            <text class="feedback-status {{item.statusClass}}">{{item.statusText}}</text>
+          </view>
+        </view>
+        <text class="my-feedback-content {{item.expanded ? 'expanded' : ''}}">{{item.content}}</text>
+        <view class="my-feedback-footer">
+          <text>{{item.timeText}}</text>
+          <text class="feedback-chevron {{item.expanded ? 'expanded' : ''}}">⌄</text>
+        </view>
+        <view class="reply-panel" wx:if="{{item.expanded}}">
+          <block wx:if="{{item.publicReply}}">
+            <view class="reply-heading">
+              <text class="reply-label">管理员回复</text>
+              <text class="reply-time">{{item.replyTimeText}}</text>
+            </view>
+            <text class="reply-content">{{item.publicReply}}</text>
+          </block>
+          <text wx:else class="reply-empty">{{item.emptyReplyText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{feedbackHasMore}}" class="feedback-load-more" bindtap="loadMoreFeedback">
+      {{feedbackLoadingMore ? '加载中…' : '加载更多'}}
+    </view>
+  </view>
+</view>

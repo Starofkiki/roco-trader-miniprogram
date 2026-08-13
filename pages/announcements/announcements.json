@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "历史公告",
+  "navigationBarBackgroundColor": "#fffdf8",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f8f1e7",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "onReachBottomDistance": 120
+}

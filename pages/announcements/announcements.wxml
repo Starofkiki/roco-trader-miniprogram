@@ -1,0 +1,49 @@
+<view class="container announcements-page">
+  <view class="page-heading">
+    <text class="page-title">历史公告</text>
+    <text class="page-subtitle">版本更新、异常说明与功能通知</text>
+    <text wx:if="{{total}}" class="page-count">共 {{total}} 条</text>
+  </view>
+
+  <view wx:if="{{initialLoading}}" class="state-card">正在加载公告…</view>
+
+  <view wx:elif="{{errorMessage && !announcements.length}}" class="state-card error-state">
+    <text class="state-title">暂时无法加载公告</text>
+    <text class="state-copy">{{errorMessage}}</text>
+    <button class="retry-button" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <view wx:elif="{{!announcements.length}}" class="state-card empty-state">
+    <text class="state-title">暂无历史公告</text>
+    <text class="state-copy">新公告发布后会显示在这里</text>
+  </view>
+
+  <view wx:else class="announcement-list">
+    <view
+      wx:for="{{announcements}}"
+      wx:key="id"
+      class="announcement-card {{item.pinned ? 'pinned' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="openAnnouncement"
+    >
+      <view class="announcement-meta">
+        <text wx:if="{{item.pinned}}" class="pinned-badge">置顶</text>
+        <text class="announcement-date">{{item.dateText}}</text>
+      </view>
+      <view class="announcement-title-row">
+        <text class="announcement-title">{{item.title}}</text>
+        <text class="announcement-arrow">›</text>
+      </view>
+      <text class="read-more">查看完整公告</text>
+    </view>
+
+    <view wx:if="{{errorMessage}}" class="inline-error">
+      <text>{{errorMessage}}</text>
+      <text class="retry-link" bindtap="retryLoad">重试</text>
+    </view>
+    <button wx:if="{{hasMore && !errorMessage}}" class="load-more-button" loading="{{loading}}" bindtap="loadMore">
+      {{loading ? '加载中…' : '加载更多'}}
+    </button>
+    <text wx:if="{{!hasMore}}" class="list-end">已显示全部公告</text>
+  </view>
+</view>

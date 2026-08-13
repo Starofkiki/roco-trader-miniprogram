@@ -1,0 +1,80 @@
+{
+  "cloud": true,
+  "pages": [
+    "pages/home/home",
+    "pages/follow/follow",
+    "pages/stats/stats",
+    "pages/products/index",
+    "pages/product-detail/index",
+    "pages/profile/profile"
+  ],
+  "subpackages": [
+    {
+      "root": "pages/feedback",
+      "pages": [
+        "feedback"
+      ]
+    },
+    {
+      "root": "pages/about",
+      "pages": [
+        "about"
+      ]
+    },
+    {
+      "root": "pages/admin",
+      "pages": [
+        "admin"
+      ]
+    },
+    {
+      "root": "pages/announcements",
+      "pages": [
+        "announcements",
+        "detail"
+      ]
+    }
+  ],
+  "window": {
+    "navigationBarTitleText": "远行商人记录本",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fff8f3",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#8e8578",
+    "selectedColor": "#d88400",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "assets/tab/shouye.png",
+        "selectedIconPath": "assets/tab/shouye.png"
+      },
+      {
+        "pagePath": "pages/follow/follow",
+        "text": "关注",
+        "iconPath": "assets/tab/guanzhu.png",
+        "selectedIconPath": "assets/tab/guanzhu.png"
+      },
+      {
+        "pagePath": "pages/stats/stats",
+        "text": "统计",
+        "iconPath": "assets/tab/tongji.png",
+        "selectedIconPath": "assets/tab/tongji.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/tab/wode.png",
+        "selectedIconPath": "assets/tab/wode.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

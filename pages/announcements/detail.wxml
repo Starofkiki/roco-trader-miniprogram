@@ -1,0 +1,28 @@
+<view class="container detail-page">
+  <view wx:if="{{loading}}" class="state-card">正在打开公告…</view>
+
+  <view wx:elif="{{errorMessage}}" class="state-card error-state">
+    <text class="state-title">暂时无法查看</text>
+    <text class="state-copy">{{errorMessage}}</text>
+    <button class="retry-button" bindtap="retryLoad">重新加载</button>
+    <text class="back-link" bindtap="goBackToList">返回历史公告</text>
+  </view>
+
+  <view wx:elif="{{announcement}}" class="announcement-paper">
+    <view class="paper-accent"></view>
+    <view class="detail-meta">
+      <text wx:if="{{announcement.pinned}}" class="pinned-badge">置顶公告</text>
+      <text class="detail-date">{{announcement.dateText}}</text>
+    </view>
+    <text class="detail-title">{{announcement.title}}</text>
+    <view class="detail-divider">
+      <text class="divider-mark"></text>
+    </view>
+    <text class="detail-content">{{announcement.content}}</text>
+    <view class="paper-footer">
+      <text>远行商人记录本</text>
+    </view>
+  </view>
+
+  <button wx:if="{{announcement}}" class="back-button" bindtap="goBackToList">返回历史公告</button>
+</view>

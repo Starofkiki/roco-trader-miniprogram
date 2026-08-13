@@ -1,0 +1,53 @@
+<view class="follow-page">
+  <view class="container body-wrap">
+    <view class="follow-hero card">
+      <view class="hero-copy">
+        <text class="hero-title">关注提醒</text>
+        <text class="hero-sub">选中商品后自动保存关注，当商品出现后如有剩余次数则通知</text>
+      </view>
+      <view class="hero-count">
+        <text class="count-value">{{savedCount}}</text>
+        <text class="count-label">已选</text>
+      </view>
+    </view>
+
+    <view class="quota-card card {{quotaStateClass}}">
+      <view class="quota-main">
+        <view class="quota-title-row">
+          <text class="quota-title">剩余 {{reminderCount}} 次提醒</text>
+          <text class="sync-state {{syncState}}" bindtap="retryFollowSync">{{syncText}}</text>
+        </view>
+        <text wx:if="{{hasRejectedTemplates}}" class="quota-warning">{{rejectedTemplateCount}} 个提醒通道需要重新授权</text>
+        <text wx:elif="{{hasMultipleTemplates}}" class="quota-sub">共有三个提醒通道，每次可以增加三次次数，每轮最多发一条。</text>
+        <text wx:else class="quota-sub">每成功允许一个模板，会增加 1 次可发送提醒。</text>
+      </view>
+      <view
+        class="quota-action {{subscribeLoading || quotaActionDisabled ? 'is-loading' : ''}}"
+        bindtap="enableWechatReminder"
+      >
+        {{subscribeLoading ? '请求中' : quotaActionText}}
+      </view>
+    </view>
+
+    <view class="reminder-issue card" wx:if="{{reminderIssueVisible}}">
+      <view class="issue-mark">!</view>
+      <view class="issue-main">
+        <text class="issue-title">提醒没有送到</text>
+        <text class="issue-text">{{reminderIssueText}}</text>
+      </view>
+      <view class="issue-close" bindtap="dismissReminderIssue">知道了</view>
+    </view>
+
+    <view class="goods-grid follow-grid">
+      <view class="goods-tile {{item.isRecommended ? 'recommended' : ''}} {{item.checked ? 'checked' : ''}}" wx:for="{{followItems}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleItem">
+        <view class="tile-check">{{item.checked ? '✓' : ''}}</view>
+        <text wx:if="{{item.isFixedHotBundle}}" class="schedule-badge">周五首轮</text>
+        <view class="tile-thumb">
+          <image wx:if="{{item.hasImage}}" class="tile-image" src="{{item.image}}" mode="aspectFit" lazy-load data-id="{{item.id}}" data-name="{{item.name}}" binderror="handleFollowImageError"></image>
+          <text wx:else class="tile-fallback">{{item.icon}}</text>
+        </view>
+        <text class="tile-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+</view>

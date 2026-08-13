@@ -1,0 +1,43 @@
+# Dependencies and generated packages
+node_modules/
+miniprogram_npm/
+**/miniprogram_npm/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+SecretKey.csv
+roco_admin.txt
+
+# Logs and runtime output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+tools/admin-dashboard/.npm-cache/
+tools/admin-dashboard/cache/
+
+# WeChat DevTools local/private settings
+project.private.config.json
+
+# Local runtime data
+backend/src/data/*.json
+backend/src/data/*.sqlite
+backend/src/data/*.sqlite-*
+cloudfunctions/seed/database_export-*.json
+
+# Private exports, migration reports, and local working files
+chuangzuo/
+docs/seed/
+docs/social-posts/
+tools/catalog/product-catalog-migration-report.json
+tmp/
+ui/
+/.public-release/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

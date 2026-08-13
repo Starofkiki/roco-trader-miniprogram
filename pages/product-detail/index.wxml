@@ -1,0 +1,75 @@
+<view wx:if="{{detailReady}}" class="container product-detail-page">
+  <view class="detail-hero card">
+    <view class="hero-content">
+      <view class="product-image-shell">
+        <view class="image-halo"></view>
+        <image wx:if="{{product.hasImage}}" class="product-image" src="{{product.image}}" mode="aspectFit" binderror="handleProductImageError"></image>
+      </view>
+
+      <view class="detail-main">
+        <text class="detail-title">{{product.title}}</text>
+        <text class="type-pill {{product.typeKey}}">{{product.typeText}}</text>
+
+        <view class="trade-meta" wx:if="{{product.hasLimit || product.hasPrice}}">
+          <text wx:if="{{product.hasLimit}}" class="limit-text">{{product.limitText}}</text>
+          <view wx:if="{{product.hasPrice}}" class="price-row">
+            <image class="coin-image" src="/assets/goods/roco_coin.png" mode="aspectFit"></image>
+            <text class="price-text">{{product.priceText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{product.showInfoCard}}" class="info-card card">
+    <view wx:if="{{product.showDescription}}" class="info-section">
+      <text class="info-title">商品介绍</text>
+      <text class="info-content">{{product.description}}</text>
+    </view>
+
+    <view wx:if="{{product.showDescription && product.showObtain}}" class="info-divider"></view>
+
+    <view wx:if="{{product.showObtain}}" class="info-section">
+      <text class="info-title">获取方式</text>
+      <view class="obtain-list">
+        <view wx:for="{{product.obtainItems}}" wx:key="*this" class="obtain-row">
+          <view class="obtain-dot"></view>
+          <text class="obtain-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="stats-card card">
+    <text class="stats-title">数据统计</text>
+    <view class="stats-grid">
+      <view class="stat-item last-seen">
+        <text class="stat-label">上次出现</text>
+        <text class="stat-value last-seen-value">{{historyStats.lastSeenDateText}}</text>
+        <text wx:if="{{historyStats.lastSeenRoundText}}" class="stat-subvalue">{{historyStats.lastSeenRoundText}}</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-label">近7日出现</text>
+        <text class="stat-value count-value">{{historyStats.sevenDayCountText}}</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-label">近30日出现</text>
+        <text class="stat-value count-value">{{historyStats.thirtyDayCountText}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{historyStats.showSeasonRates}}" class="season-stats">
+      <view class="season-stats-divider"></view>
+      <text class="season-stats-title">{{historyStats.seasonRateTitle}}</text>
+      <view class="season-rate-list">
+        <view class="season-rate-row" wx:for="{{historyStats.seasonRateRows}}" wx:key="key">
+          <text class="season-rate-label">{{item.label}}</text>
+          <text class="season-rate-value">{{item.valueText}}</text>
+        </view>
+      </view>
+      <text wx:if="{{historyStats.showS1DataNote}}" class="season-data-note">S1数据存在遗漏，出现频率可能不准确，仅供参考。</text>
+    </view>
+  </view>
+</view>
